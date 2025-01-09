@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ny_taxi
+    ports:
+      - "5432:5432"
+    volumes:
+      - ny_taxi_postgres_data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+  pipeline:
+    build: .
+    container_name: pipeline
+    depends_on:
+      - postgres
+    environment:
+      DB_USERNAME: admin
+      DB_PASSWORD: admin
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ny_taxi
+      DB_TABLE_TRIPDATA: yellow_taxi
+      CSV_URL_TRIPDATA: https://github.com/DataTalksClub/nyc-tlc-data/releases/download/green/green_tripdata_2019-10.csv.gz
+      DB_TABLE_ZONES: taxi_zones
+      CSV_URL_ZONES: https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv
+volumes:
+  ny_taxi_postgres_data:
